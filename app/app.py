@@ -1,13 +1,19 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import joblib
+import os
 
 app = Flask(__name__)
 
+# ==========================
 # Load saved model
-model = joblib.load("../models/model.pkl")
-scaler = joblib.load("../models/scaler.pkl")
-label_encoder = joblib.load("../models/label_encoder.pkl")
+# ==========================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model = joblib.load(os.path.join(BASE_DIR, "..", "models", "model.pkl"))
+scaler = joblib.load(os.path.join(BASE_DIR, "..", "models", "scaler.pkl"))
+label_encoder = joblib.load(os.path.join(BASE_DIR, "..", "models", "label_encoder.pkl"))
 
 
 @app.route("/")
@@ -45,6 +51,7 @@ def predict():
     # ==========================
 
     sample = pd.DataFrame([[
+
         ssc_p,
         hsc_p,
         degree_p,
@@ -68,6 +75,7 @@ def predict():
         1 if specialisation == "Mkt&HR" else 0
 
     ]], columns=[
+
         'ssc_p',
         'hsc_p',
         'degree_p',
@@ -82,15 +90,19 @@ def predict():
         'degree_t_Sci&Tech',
         'workex_Yes',
         'specialisation_Mkt&HR'
+
     ])
 
     # Scale
+
     sample_scaled = scaler.transform(sample)
 
     # Prediction
+
     prediction = model.predict(sample_scaled)
 
     # Probability
+
     probability = model.predict_proba(sample_scaled)
 
     confidence = round(max(probability[0]) * 100, 2)
